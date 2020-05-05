@@ -1,0 +1,13 @@
+.x-clear-all {
+  font-size: 35px;
+}
+
+.delete-btn:hover {
+  color: #007bff;
+  cursor: pointer;
+}
+
+.check-task:hover {
+  color: #007bff;
+  cursor: pointer;
+}
