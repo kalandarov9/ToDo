@@ -40,17 +40,20 @@ const tasks = [
   const listConteiner = document.querySelector(
     ".tasks-list-section .list-group"
   );
+  const listConteinerCompleted = document.querySelector(
+    ".tasks-list-section .list-group-completed"
+  );
   const form = document.forms["addTask"];
   const inputTitle = form.elements["title"];
   const inputBody = form.elements["body"];
   const containerTasks = document.querySelector(
     ".tasks-list-section .container"
   );
-  const activeContent = document.querySelector("#active-content");
 
   renderAllTasks(objOfTasks);
 
   form.addEventListener("submit", onFormsSubmit);
+
   containerTasks.addEventListener("click", checkTask);
 
   containerTasks.addEventListener("click", deleteTaskWithButton);
@@ -59,9 +62,15 @@ const tasks = [
     if (e.target.classList.contains("check-task")) {
       const parent = e.target.closest("[data-task-id]");
       const id = parent.dataset.taskId;
-      objOfTasks[id].completed = true;
-      renderAllTasks(objOfTasks);
       deleteRowAllButton();
+
+      objOfTasks[id].completed = true;
+
+      while (listConteinerCompleted.firstChild) {
+        listConteinerCompleted.removeChild(listConteinerCompleted.firstChild);
+      }
+
+      renderAllTasks(objOfTasks);
     }
   }
 
@@ -84,9 +93,16 @@ const tasks = [
       if (task.completed === false) {
         const li = listItemTemplate(task);
         fragment.appendChild(li);
+        listConteiner.appendChild(fragment);
+      }
+
+      if (task.completed === true) {
+        const li2 = listItemTemplate(task);
+        fragment.appendChild(li2);
+
+        listConteinerCompleted.appendChild(fragment);
       }
     });
-    listConteiner.appendChild(fragment);
   }
 
   function listItemTemplate({ _id, title, body } = {}) {
@@ -152,7 +168,6 @@ const tasks = [
 
   function createDelAllButton() {
     if (document.querySelector(".x-clear-all")) {
-      //alert("ecnm");
       return;
     }
     containerTasks.insertAdjacentHTML(
@@ -270,7 +285,7 @@ const tasks = [
 
   function deleteRowAllButton() {
     const delete_btns = document.querySelectorAll(".delete-btn");
-    console.log(delete_btns.length);
+    //console.log(delete_btns.length);
     if (delete_btns.length == 0) {
       if (document.querySelector(".div-clear-all")) {
         document.querySelector(".div-clear-all").hidden = true;
