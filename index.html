@@ -67,13 +67,14 @@
             >
             <a
               class="nav-item nav-link"
-              id="nav-profile-tab"
+              id="nav-check-tab"
               data-toggle="tab"
-              href="#nav-profile"
+              href="#nav-completed"
               role="tab"
               aria-controls="nav-profile"
               aria-selected="false"
-              >Completed</a
+              >Completed
+              <span class="badge badge-primary badge-pill">14</span></a
             >
           </div>
         </nav>
@@ -88,11 +89,70 @@
           </div>
           <div
             class="tab-pane fade"
-            id="nav-profile"
+            id="nav-completed"
             role="tabpanel"
-            aria-labelledby="nav-profile-tab"
+            aria-labelledby="nav-check-tab"
           >
             <ul class="list-group-completed"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="editTaskModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form name="editTask">
+              <div class="form-group">
+                <label for="formGroupExampleInput">Title Task</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="input-title"
+                  name="input-title"
+                  placeholder="Example input"
+                />
+              </div>
+              <div class="form-group">
+                <textarea
+                  class="form-control"
+                  id="text-area-body"
+                  name="text-area-body"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary save-changes">
+              Save changes
+            </button>
           </div>
         </div>
       </div>
