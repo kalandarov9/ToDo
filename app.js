@@ -58,12 +58,44 @@ const tasks = [
 
   containerTasks.addEventListener("click", deleteTaskWithButton);
 
+  containerTasks.addEventListener("click", modalEditTask);
+
+  function modalEditTask(e) {
+    if (e.target.classList.contains("edit-task")) {
+      const parent = e.target.closest("[data-task-id]");
+      const id = parent.dataset.taskId;
+
+      const formEditTask = document.forms["editTask"];
+      const inputTitle = formEditTask.elements["input-title"];
+      const inputBody = formEditTask.elements["text-area-body"];
+
+      for (const key in objOfTasks) {
+        if (objOfTasks[key]._id === id) {
+          inputTitle.value = objOfTasks[key].title;
+          inputBody.value = objOfTasks[key].body;
+        }
+      }
+
+      $("#editTaskModal").modal("show");
+
+      document.querySelector(".save-changes").addEventListener("click", (e) => {
+        objOfTasks[id].title = inputTitle.value;
+        objOfTasks[id].body = inputBody.value;
+
+        while (listConteinerCompleted.firstChild) {
+          listConteinerCompleted.removeChild(listConteinerCompleted.firstChild);
+        }
+
+        renderAllTasks(objOfTasks);
+      });
+    }
+  }
+
   function checkTask(e) {
     if (e.target.classList.contains("check-task")) {
       const parent = e.target.closest("[data-task-id]");
       const id = parent.dataset.taskId;
       deleteRowAllButton();
-
       objOfTasks[id].completed = true;
 
       while (listConteinerCompleted.firstChild) {
@@ -99,22 +131,24 @@ const tasks = [
       if (task.completed === true) {
         const li2 = listItemTemplate(task);
         fragment.appendChild(li2);
-
         listConteinerCompleted.appendChild(fragment);
       }
     });
   }
 
-  function listItemTemplate({ _id, title, body } = {}) {
+  function listItemTemplate({ _id, title, body, completed } = {}) {
     const li = document.createElement("li");
     li.classList.add(
       "list-group-item",
       "d-flex",
       "align-items-center",
       "flex-wrap",
+      "justify-content-between",
       "mt-2"
     );
     li.setAttribute("data-task-id", _id);
+
+    const div = document.createElement("div");
 
     const span = document.createElement("span");
     span.textContent = title;
@@ -122,16 +156,28 @@ const tasks = [
     const iTrash = document.createElement("i");
     iTrash.classList.add("fas", "fa-trash", "ml-2", "delete-btn");
 
+    const edit = document.createElement("i");
+    edit.classList.add("fas", "fa-edit", "ml-2", "edit-task");
+
     const check = document.createElement("i");
-    check.classList.add("fas", "fa-check", "ml-auto", "check-task");
+    if (completed !== true) {
+      check.classList.add("fas", "fa-check", "ml-2", "check-task");
+    } else {
+      iTrash.classList.add("completed-del");
+    }
 
     const p = document.createElement("p");
     p.textContent = body;
     p.classList.add("mt-2", "w-100");
 
     li.appendChild(span);
-    li.appendChild(check);
-    li.appendChild(iTrash);
+    li.appendChild(div);
+    if (completed !== true) {
+      div.appendChild(check);
+      div.appendChild(edit);
+    }
+
+    div.appendChild(iTrash);
     li.appendChild(p);
 
     return li;
@@ -150,7 +196,7 @@ const tasks = [
     const task = createNewTask(titleValue, bodyValue);
     const listItem = listItemTemplate(task);
     listConteiner.insertAdjacentElement("afterbegin", listItem);
-    document.querySelector(".div-clear-all").hidden = false;
+    //document.querySelector(".div-clear-all").hidden = false;
     form.reset();
   }
 
@@ -168,9 +214,11 @@ const tasks = [
 
   function createDelAllButton() {
     if (document.querySelector(".x-clear-all")) {
+      //alert("НЕЕТ");
       return;
     }
-    containerTasks.insertAdjacentHTML(
+
+    listConteinerCompleted.insertAdjacentHTML(
       "afterbegin",
       ` <div class="row justify-content-between div-clear-all">
     <a href="" data-toggle="modal" data-target="#exampleModal" class="ml-auto float-right x-clear-all">
@@ -181,7 +229,6 @@ const tasks = [
   }
 
   function oneDeleteTask(id, target, parent) {
-    console.log(objOfTasks);
     const { title } = objOfTasks[id];
     createModuleWindow(target, title);
     $("#deleteTask").modal("show");
@@ -208,7 +255,14 @@ const tasks = [
       document
         .querySelector(".model-btn-yes")
         .addEventListener("click", deleteAllTaskWithButton);
-      objOfTasks = [];
+
+      for (const key in objOfTasks) {
+        console.log(objOfTasks[key]);
+        if (objOfTasks[key].completed === true) {
+          objOfTasks[key] = [];
+        }
+      }
+
       deleteRowAllButton();
     }
   }
@@ -284,8 +338,9 @@ const tasks = [
   }
 
   function deleteRowAllButton() {
-    const delete_btns = document.querySelectorAll(".delete-btn");
-    //console.log(delete_btns.length);
+    const delete_btns = document.querySelectorAll(".completed-del");
+    //const delete_btns_complete = document.querySelectorAll(".del");
+    //console.log(delete_btns_complete.length);
     if (delete_btns.length == 0) {
       if (document.querySelector(".div-clear-all")) {
         document.querySelector(".div-clear-all").hidden = true;
@@ -295,8 +350,8 @@ const tasks = [
 
   function deleteAllTaskWithButton() {
     document.querySelector(".div-clear-all").hidden = true;
-    while (listConteiner.firstChild) {
-      listConteiner.removeChild(listConteiner.firstChild);
+    while (listConteinerCompleted.firstChild) {
+      listConteinerCompleted.removeChild(listConteinerCompleted.firstChild);
     }
   }
 
