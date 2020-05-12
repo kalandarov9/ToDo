@@ -49,16 +49,60 @@ const tasks = [
   const containerTasks = document.querySelector(
     ".tasks-list-section .container"
   );
+  const themeSelect = document.getElementById("themeSelect");
 
   renderAllTasks(objOfTasks);
+  getStorage();
 
   form.addEventListener("submit", onFormsSubmit);
+
+  themeSelect.addEventListener("change", selectTheme);
 
   containerTasks.addEventListener("click", checkTask);
 
   containerTasks.addEventListener("click", deleteTaskWithButton);
 
   containerTasks.addEventListener("click", modalEditTask);
+
+  containerTasks.addEventListener("click", restoreTrash);
+
+  function countTask() {
+    let countFalse = 0;
+    let countTrue = 0;
+    for (const key in objOfTasks) {
+      if (objOfTasks[key].completed === true) {
+        countTrue++;
+      }
+      if (objOfTasks[key].completed === false) {
+        countFalse++;
+      }
+    }
+
+    const navHomeTab = document.querySelector(".allTask");
+    const completedTask = document.querySelector(".completedTask");
+
+    navHomeTab.textContent = countFalse;
+    completedTask.textContent = countTrue;
+
+    if (countFalse == 0) {
+      document.querySelector(".allTask").hidden = true;
+    } else {
+      document.querySelector(".allTask").hidden = false;
+    }
+
+    if (countTrue == 0) {
+      document.querySelector(".completedTask").hidden = true;
+    } else {
+      document.querySelector(".completedTask").hidden = false;
+    }
+
+    viewMessageEmptyContainer();
+
+    return {
+      true: countTrue,
+      false: countFalse,
+    };
+  }
 
   function modalEditTask(e) {
     if (e.target.classList.contains("edit-task")) {
@@ -82,11 +126,11 @@ const tasks = [
         objOfTasks[id].title = inputTitle.value;
         objOfTasks[id].body = inputBody.value;
 
-        while (listConteinerCompleted.firstChild) {
-          listConteinerCompleted.removeChild(listConteinerCompleted.firstChild);
-        }
+        whileDeleteElement(listConteinerCompleted);
 
         renderAllTasks(objOfTasks);
+
+        $("#editTaskModal").modal("toggle");
       });
     }
   }
@@ -98,19 +142,16 @@ const tasks = [
       deleteRowAllButton();
       objOfTasks[id].completed = true;
 
-      while (listConteinerCompleted.firstChild) {
-        listConteinerCompleted.removeChild(listConteinerCompleted.firstChild);
-      }
+      whileDeleteElement(listConteinerCompleted);
 
       renderAllTasks(objOfTasks);
+      //viewMessageEmptyContainer();
     }
   }
 
   function renderAllTasks(tasksList) {
     if (containerTasks.childElementCount > 0) {
-      while (listConteiner.firstChild) {
-        listConteiner.removeChild(listConteiner.firstChild);
-      }
+      whileDeleteElement(listConteiner);
     }
 
     if (!tasksList) {
@@ -134,6 +175,8 @@ const tasks = [
         listConteinerCompleted.appendChild(fragment);
       }
     });
+
+    countTask();
   }
 
   function listItemTemplate({ _id, title, body, completed } = {}) {
@@ -149,6 +192,7 @@ const tasks = [
     li.setAttribute("data-task-id", _id);
 
     const div = document.createElement("div");
+    div.classList.add("div-icon");
 
     const span = document.createElement("span");
     span.textContent = title;
@@ -159,11 +203,15 @@ const tasks = [
     const edit = document.createElement("i");
     edit.classList.add("fas", "fa-edit", "ml-2", "edit-task");
 
+    const rTrash = document.createElement("i");
+
     const check = document.createElement("i");
     if (completed !== true) {
       check.classList.add("fas", "fa-check", "ml-2", "check-task");
     } else {
       iTrash.classList.add("completed-del");
+
+      rTrash.classList.add("fas", "fa-trash-restore", "restore-to-trash");
     }
 
     const p = document.createElement("p");
@@ -175,6 +223,12 @@ const tasks = [
     if (completed !== true) {
       div.appendChild(check);
       div.appendChild(edit);
+    } else {
+      div.appendChild(rTrash);
+    }
+
+    if (completed === false) {
+      //div.appendChild(rTrash);
     }
 
     div.appendChild(iTrash);
@@ -198,6 +252,7 @@ const tasks = [
     listConteiner.insertAdjacentElement("afterbegin", listItem);
     //document.querySelector(".div-clear-all").hidden = false;
     form.reset();
+    countTask();
   }
 
   function createNewTask(title, body) {
@@ -236,6 +291,7 @@ const tasks = [
       parent.remove();
       delete objOfTasks[id];
       deleteRowAllButton();
+      countTask();
     });
   }
 
@@ -350,9 +406,92 @@ const tasks = [
 
   function deleteAllTaskWithButton() {
     document.querySelector(".div-clear-all").hidden = true;
-    while (listConteinerCompleted.firstChild) {
-      listConteinerCompleted.removeChild(listConteinerCompleted.firstChild);
+
+    whileDeleteElement(listConteinerCompleted);
+    countTask();
+  }
+
+  function viewMessageEmptyContainer() {
+    const taskAll = listConteiner.childElementCount;
+    const taskCompleted = listConteinerCompleted.childElementCount;
+    if (taskAll == 0) {
+      listConteiner.insertAdjacentHTML(
+        "afterbegin",
+        ` <div class="row justify-content-between div-empty-message-all">
+        <div class="alert alert-primary mx-auto mt-5" role="alert">
+        Создайте Task.
+      </div>
+      </div>`
+      );
     }
+    if (taskAll > 0) {
+      if (document.querySelector(".div-empty-message-all")) {
+        document.querySelector(".div-empty-message-all").hidden = true;
+      }
+    }
+    if (taskCompleted == 0) {
+      listConteinerCompleted.insertAdjacentHTML(
+        "afterbegin",
+        ` <div class="row justify-content-between div-empty-message-completed">
+        <div class="alert alert-primary mx-auto mt-5" role="alert">
+        Нет законченных тасков
+      </div>
+      </div>`
+      );
+    }
+    if (taskCompleted > 0) {
+      if (document.querySelector(".div-empty-message-completed")) {
+        document.querySelector(".div-empty-message-completed").hidden = true;
+      }
+    }
+  }
+
+  function whileDeleteElement(elements) {
+    while (elements.firstChild) {
+      elements.removeChild(elements.firstChild);
+    }
+  }
+
+  function restoreTrash(e) {
+    //console.log(objOfTasks);
+
+    if (e.target.classList.contains("restore-to-trash")) {
+      const parent = e.target.closest("[data-task-id]");
+      const id = parent.dataset.taskId;
+
+      for (const key in objOfTasks) {
+        if (objOfTasks[key]._id === id) {
+          objOfTasks[key].completed = false;
+          whileDeleteElement(listConteinerCompleted);
+          renderAllTasks(objOfTasks);
+          // console.log(objOfTasks);
+        }
+      }
+    }
+  }
+
+  function selectTheme() {
+    const value = themeSelect.value;
+    setTheme(value);
+    localStorage.setItem("set_theme", value);
+  }
+
+  function setTheme(name) {
+    const selectedThemObj = themes[name];
+    Object.entries(selectedThemObj).forEach(([key, value]) => {
+      document.documentElement.style.setProperty(key, value); ws=]
+    });
+  }
+
+  function getStorage() {
+    const theme = localStorage.getItem("set_theme");
+    if (theme) {
+      //themeSelect[0].selected = true;
+      themeSelect[1].selected = true;
+      setTheme(theme);
+    }
+
+    return;
   }
 
   //генерация uuid

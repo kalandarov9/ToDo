@@ -11,14 +11,27 @@
       crossorigin="anonymous"
     />
     <link
-      href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
       rel="stylesheet"
     />
 
     <link rel="stylesheet" href="main.css" />
+    <script src="theme.js"></script>
+
     <title>Todo List</title>
   </head>
   <body>
+    <nav class="header navbar navbar-dark bg-primary">
+      <a class="navbar-brand">ToDo</a>
+      <form class="form-inline" name="form-inline">
+        <select class="form-control form-control-sm" id="themeSelect">
+          <option value="default">Theme Default</option>
+          <option value="light">Theme Light</option>
+          <option value="dark">Theme Dark</option>
+        </select>
+      </form>
+    </nav>
+
     <div class="form-section mt-5">
       <div class="container">
         <div class="row">
@@ -63,8 +76,9 @@
               role="tab"
               aria-controls="nav-home"
               aria-selected="true"
-              >All Tasks</a
-            >
+              >All Tasks
+              <span class="badge badge-primary badge-pill allTask"></span
+            ></a>
             <a
               class="nav-item nav-link"
               id="nav-check-tab"
@@ -74,7 +88,9 @@
               aria-controls="nav-profile"
               aria-selected="false"
               >Completed
-              <span class="badge badge-primary badge-pill">14</span></a
+              <span class="badge badge-primary badge-pill completedTask"
+                >14</span
+              ></a
             >
           </div>
         </nav>
